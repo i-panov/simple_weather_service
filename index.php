@@ -75,8 +75,8 @@ $precipitation = $xml->precipitation->attributes();
 
 exit_json([
     'sun' => [
-        'rise' => (string)$sun->rise,
-        'set' => (string)$sun->set,
+        'rise' => (string)$sun->set, // есть подозрение что они из апи возвращаются перепутанными, судя по значениям
+        'set' => (string)$sun->rise,
     ],
     'temperature' => [
         'current' => round_int($xml->temperature->attributes()->value),
