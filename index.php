@@ -1,5 +1,25 @@
 <?php
 
+// добавил поддержку CORS, т.к. тестировал в Chrome
+
+if (isset($_SERVER['HTTP_ORIGIN'])) {
+    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Max-Age: 86400');
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+    }
+
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
+        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+    }
+
+    exit(0);
+}
+
 function exit_json($response, int $status = 200) {
     header('Content-Type: application/json; charset=utf8');
     echo json_encode($response);
@@ -14,9 +34,9 @@ if (!$city) {
 }
 
 function get_request(string $url, array $query, ?int &$status) {
-    $response = @file_get_contents($url . '?' . http_build_query($query), false, stream_context_create([
-        'ignore_errors' => true,
-    ]));
+    $url = $url . '?' . http_build_query($query);
+    $context = stream_context_create(['http' => ['ignore_errors' => true]]);
+    $response = @file_get_contents($url, false, $context);
 
     preg_match('/HTTP\/\d\.\d (\d+) /', $http_response_header[0], $matches);
     $status = (int)$matches[1];
